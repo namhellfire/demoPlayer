@@ -97,7 +97,6 @@ public class MainFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        Log.d(TAG, "oncreate");
         arrayList = new ArrayList<>();
         arrayList = getArguments().getParcelableArrayList(ListManager.DATA_CONTENT);
     }
@@ -113,7 +112,6 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        Log.d(TAG, "oncreate view ");
         View v = inflater.inflate(R.layout.fragment_top, container, false);
         int currentOrientation = getResources().getConfiguration().orientation;
         if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -154,15 +152,15 @@ public class MainFragment extends Fragment {
                 super.onScrolled(recyclerView, dx, dy);
                 final int currentFirstVisibleItem = gridLayoutManager.findFirstVisibleItemPosition();
                 final int currentLastVisibleItem = gridLayoutManager.findLastVisibleItemPosition();
-
-                if (currentFirstVisibleItem > this.mLastFirstVisibleItem) {
-//                    getActivity().getSupportActionBar().hide();
-                    actionBar.hide();
-                } else if (currentFirstVisibleItem < this.mLastFirstVisibleItem) {
-//                    getActivity().getSupportActionBar().show();
-                    actionBar.show();
-                }
-
+//
+//                if (currentFirstVisibleItem > this.mLastFirstVisibleItem) {
+////                    getActivity().getSupportActionBar().hide();
+//                    actionBar.hide();
+//                } else if (currentFirstVisibleItem + 1 < this.mLastFirstVisibleItem) {
+////                    getActivity().getSupportActionBar().show();
+//                    actionBar.show();
+//                }
+//
                 if (currentLastVisibleItem == (offlineAdapter.getItemCount()-1)){
                     mListview.setPadding(0,0,0,150);
                     mListview.requestLayout();
@@ -174,9 +172,6 @@ public class MainFragment extends Fragment {
                 this.mLastFirstVisibleItem = currentFirstVisibleItem;
             }
         });
-
-
-        Log.d(TAG, "Url api : " + MainActivity.ApiUrl);
 
         return v;
     }
@@ -224,18 +219,5 @@ public class MainFragment extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
-
-//    private void hideViews() {
-//        mToolbar.animate().translationY(-mToolbar.getHeight()).setInterpolator(new AccelerateInterpolator(2));
-//
-//        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mFabButton.getLayoutParams();
-//        int fabBottomMargin = lp.bottomMargin;
-//        mFabButton.animate().translationY(mFabButton.getHeight() + fabBottomMargin).setInterpolator(new AccelerateInterpolator(2)).start();
-//    }
-//
-//    private void showViews() {
-//        mToolbar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2));
-//        mFabButton.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
-//    }
 
 }

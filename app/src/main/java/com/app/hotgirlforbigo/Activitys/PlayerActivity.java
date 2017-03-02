@@ -94,7 +94,7 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
-//        mAdView.setVisibility(View.GONE);
+        mAdView.setVisibility(View.GONE);
 
         iconClose = (TextView) findViewById(R.id.iconClose);
         iconClose.setTypeface(icon_manager.get_icons("fonts/ionicons.ttf", this));

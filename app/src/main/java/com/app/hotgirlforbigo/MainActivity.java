@@ -3,7 +3,11 @@ package com.app.hotgirlforbigo;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -18,9 +22,11 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
@@ -38,12 +44,24 @@ import com.app.hotgirlforbigo.Model.ListAPI;
 import com.app.hotgirlforbigo.Model.PreferenceShare;
 import com.app.hotgirlforbigo.Model.Profile;
 import com.app.hotgirlforbigo.Utils.Util;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.widget.ShareDialog;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.wang.avi.AVLoadingIndicatorView;
 
+import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import static com.app.hotgirlforbigo.R.menu.main;
 
@@ -62,7 +80,8 @@ public class MainActivity extends AppCompatActivity
     private RelativeLayout loading;
     private ArrayList<Profile> dataContent = new ArrayList<>();
     private AsyncOffline asyncOffline;
-    AsyncListOnline asyncListOnline;
+    private AsyncListOnline asyncListOnline;
+
 
     public static final String TAG_TOP_FRAGMENT = "TopFragment";
     public static final String TAG_NEW_FRAGMENT = "NewFragment";
@@ -80,6 +99,8 @@ public class MainActivity extends AppCompatActivity
     private Intent mIntent;
 
     private DialogSendMail dialogSendMail;
+    private ShareDialog shareDialog;
+    private CallbackManager callbackManager;
 
     private Boolean doubleBackToExitPressedOnce = false;
 
@@ -97,6 +118,43 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // ------------------ sdk facebook ------------
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        callbackManager = CallbackManager.Factory.create();
+        shareDialog = new ShareDialog(this);
+        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
+
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "com.facebook.samples.hellofacebook",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+
+        } catch (NoSuchAlgorithmException e) {
+
+        }
+
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         Drawable dr = null;
@@ -116,11 +174,10 @@ public class MainActivity extends AppCompatActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.setStatusBarColor(getResources().getColor(R.color.green));
         } else {
+
         }
 
         share = new PreferenceShare(this);
-
-        Log.d(TAG, "oncreate " + getString(R.string.app_id));
 
         MobileAds.initialize(getApplicationContext(), getString(R.string.app_id));
 
@@ -128,7 +185,7 @@ public class MainActivity extends AppCompatActivity
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
-//        mAdView.setVisibility(View.GONE);
+        mAdView.setVisibility(View.GONE);
 
 //        mIntent = getIntent();
 //        listAPIs = mIntent.getParcelableArrayListExtra(ListManager.LIST_API);
@@ -157,7 +214,7 @@ public class MainActivity extends AppCompatActivity
 //        loading = (RelativeLayout) findViewById(R.id.loading);
 
         avi = (AVLoadingIndicatorView) findViewById(R.id.avi);
-        stopAnim();
+
         if (asyncOffline == null) {
             asyncOffline = new AsyncOffline(this, avi);
         }
@@ -166,7 +223,6 @@ public class MainActivity extends AppCompatActivity
             asyncListOnline = new AsyncListOnline(this, avi);
         }
 
-//        stopAnim();
         if (share.getPreferenceBooleanValue(FIRST_RUN)) {
             if (CURRENT_TAG.equalsIgnoreCase(TAG_ONLINE_FRAGMENT) && !isOnline) {
                 LoadListOnline();
@@ -261,6 +317,22 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+
+        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                Log.d(TAG,"search view focus : "+b);
+            }
+        });
+
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                Log.d(TAG,"search view close : ");
+                return false;
+            }
+        });
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -314,7 +386,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        navItemSelected = 0;
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
@@ -346,12 +419,15 @@ public class MainActivity extends AppCompatActivity
             }
             return true;
         } else if (id == R.id.nav_share) {
-            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-            sharingIntent.setType("text/plain");
-            String shareBody = "Here is the share content body";
-            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
-            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
-            startActivity(Intent.createChooser(sharingIntent, "Share via"));
+
+            takeScreenshot();
+
+//            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+//            sharingIntent.setType("text/plain");
+//            String shareBody = "Here is the share content body";
+//            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
+//            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+//            startActivity(Intent.createChooser(sharingIntent, "Share via"));
             return true;
         } else if (id == R.id.nav_rate) {
             Intent intent = Util.getOpenRateIntent(getApplicationContext());
@@ -384,8 +460,6 @@ public class MainActivity extends AppCompatActivity
             loadDataContent();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -538,5 +612,62 @@ public class MainActivity extends AppCompatActivity
         // or avi.smoothToHide();
     }
 
+
+    private void takeScreenshot() {
+        Date now = new Date();
+        android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
+
+        try {
+            // image naming and path  to include sd card  appending name you choose for file
+//            String mPath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
+
+            // create bitmap screen capture
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    View v1 = getWindow().getDecorView().getRootView();
+                    v1.setDrawingCacheEnabled(true);
+                    Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
+                    v1.setDrawingCacheEnabled(false);
+
+                    SharePhoto photo = new SharePhoto.Builder()
+                            .setBitmap(bitmap)
+                            .build();
+                    SharePhotoContent content = new SharePhotoContent.Builder()
+                            .addPhoto(photo)
+                            .build();
+                    if (shareDialog != null) {
+//                shareDialog.canShow(content, ShareDialog.Mode.AUTOMATIC);
+                        shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
+                    }
+                }
+            }, 300);
+
+
+//            v1.setDrawingCacheEnabled(false);
+//
+//            File imageFile = new File(mPath);
+//
+//            FileOutputStream outputStream = new FileOutputStream(imageFile);
+//            int quality = 100;
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
+//            outputStream.flush();
+//            outputStream.close();
+//
+//            openScreenshot(imageFile);
+        } catch (Throwable e) {
+            // Several error may come out with file handling or OOM
+            e.printStackTrace();
+        }
+    }
+
+    private void openScreenshot(File imageFile) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        Uri uri = Uri.fromFile(imageFile);
+        intent.setDataAndType(uri, "image/*");
+        startActivity(intent);
+    }
 
 }

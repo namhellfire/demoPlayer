@@ -147,13 +147,13 @@ public class Online_fragment extends Fragment {
                 final int currentFirstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition();
                 final int currentLastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
 
-                if (currentFirstVisibleItem > this.mLastFirstVisibleItem) {
-//                    getActivity().getSupportActionBar().hide();
-                    actionBar.hide();
-                } else if (currentFirstVisibleItem < this.mLastFirstVisibleItem) {
-//                    getActivity().getSupportActionBar().show();
-                    actionBar.show();
-                }
+//                if (currentFirstVisibleItem > this.mLastFirstVisibleItem) {
+////                    getActivity().getSupportActionBar().hide();
+//                    actionBar.hide();
+//                } else if (currentFirstVisibleItem < this.mLastFirstVisibleItem) {
+////                    getActivity().getSupportActionBar().show();
+//                    actionBar.show();
+//                }
 
                 if (currentLastVisibleItem == (listCountry.size() - 1)) {
                     recyclerView.setPadding(0, 0, 0, 150);

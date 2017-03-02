@@ -34,8 +34,7 @@
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
                 android:title="Share screenShot"
-                android:enabled="false"
-                android:visible="false"/>
+                android:visible="true"/>
             <item
                 android:id="@+id/nav_rate"
                 android:icon="@drawable/ic_star"

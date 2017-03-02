@@ -13,6 +13,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.OvershootInterpolator;
 
 import com.app.hotgirlforbigo.API.ListManager;
@@ -115,7 +116,7 @@ public class SearchResultsActivity extends AppCompatActivity {
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
-//        mAdView.setVisibility(View.GONE);
+        mAdView.setVisibility(View.GONE);
 
         handleIntent(getIntent());
 

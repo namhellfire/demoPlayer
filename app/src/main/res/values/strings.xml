@@ -28,6 +28,7 @@
 
     <string name="banner_ad_unit_id">ca-app-pub-9233883698624873/6283597944</string>
     <string name="app_id">ca-app-pub-9233883698624873~4806864748</string>
+    <string name="facebook_app_id">610207142501123</string>
 
     <string-array name="nav_item_activity_title">
         <item>Home</item>
