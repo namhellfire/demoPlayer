@@ -57,7 +57,6 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.wang.avi.AVLoadingIndicatorView;
 
-import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -600,18 +599,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    void startAnim() {
-        avi.show();
-//        loading.setVisibility(View.VISIBLE);
-        // or avi.smoothToShow();
-    }
-
-    void stopAnim() {
-        avi.hide();
-//        loading.setVisibility(View.GONE);
-        // or avi.smoothToHide();
-    }
-
 
     private void takeScreenshot() {
         Date now = new Date();
@@ -643,31 +630,10 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
             }, 300);
-
-
-//            v1.setDrawingCacheEnabled(false);
-//
-//            File imageFile = new File(mPath);
-//
-//            FileOutputStream outputStream = new FileOutputStream(imageFile);
-//            int quality = 100;
-//            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
-//            outputStream.flush();
-//            outputStream.close();
-//
-//            openScreenshot(imageFile);
         } catch (Throwable e) {
             // Several error may come out with file handling or OOM
             e.printStackTrace();
         }
-    }
-
-    private void openScreenshot(File imageFile) {
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        Uri uri = Uri.fromFile(imageFile);
-        intent.setDataAndType(uri, "image/*");
-        startActivity(intent);
     }
 
 }
