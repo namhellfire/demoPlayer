@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HOT GIRL FOR BIGO</string>
+    <string name="app_name">Lets Bigo</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -17,8 +17,11 @@
 
 
     <string name="no_internet">No internet connected</string>
+    <string name="no_network">No internet connection. Make sure Wi-Fi or cellular data is turned on, then try again.</string>
     <string name="check_network">Please check your network</string>
     <string name="live_ended">Live ended. Please comeback later</string>
+    <string name="try_again">Try again</string>
+    <string name="retry">Retry</string>
 
     <string name="more">MORE</string>
 

@@ -24,7 +24,7 @@
                     android:layout_height="0dp"
                     android:layout_weight="3"
                     android:background="@drawable/round_outline"
-                    android:scaleType="fitCenter" />
+                    android:scaleType="fitXY" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"

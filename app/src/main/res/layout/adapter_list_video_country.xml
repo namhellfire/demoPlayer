@@ -5,8 +5,9 @@
 
     <ImageView
         android:id="@+id/imgItemCountry"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:scaleType="fitXY"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/round_outline_online"
+        android:scaleType="fitXY" />
 
 </LinearLayout>

@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.app.hotgirlforbigo.MainActivity"
+    tools:context="com.app.letsbigo.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
     <RelativeLayout
@@ -21,14 +21,7 @@
 
         </FrameLayout>
 
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            ads:adSize="BANNER"
-            ads:adUnitId="@string/banner_ad_unit_id"></com.google.android.gms.ads.AdView>
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -44,5 +37,32 @@
             app:indicatorColor="@color/colorPrimaryDark"
             app:indicatorName="BallClipRotateMultipleIndicator" />
 
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_no_network"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorWhite">
+
+        <TextView
+            android:id="@+id/tvNoNetwork"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="200dp"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:text="@string/no_network" />
+
+        <Button
+            android:id="@+id/btnRetry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvNoNetwork"
+            android:layout_centerHorizontal="true"
+            android:text="@string/retry" />
     </RelativeLayout>
 </RelativeLayout>

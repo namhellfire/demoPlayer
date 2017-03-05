@@ -6,7 +6,7 @@
     android:id="@+id/activity_player"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.app.hotgirlforbigo.Activitys.PlayerActivity">
+    tools:context="com.app.letsbigo.Activitys.PlayerActivity">
 
     <com.google.android.exoplayer2.ui.SimpleExoPlayerView
         android:id="@+id/exoPlayerView"
