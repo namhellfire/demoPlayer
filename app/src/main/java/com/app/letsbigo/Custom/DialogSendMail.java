@@ -79,6 +79,7 @@ public class DialogSendMail extends CustomDialog {
                     i.putExtra(Intent.EXTRA_TEXT, editContentMail.getText().toString());
                     try {
                         activity.startActivity(Intent.createChooser(i, "Send mail..."));
+                        dismiss();
                     } catch (android.content.ActivityNotFoundException ex) {
                         Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
                     }

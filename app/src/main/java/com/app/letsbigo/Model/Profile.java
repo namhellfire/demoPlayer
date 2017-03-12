@@ -13,7 +13,18 @@ public class Profile implements Parcelable {
     private String url;
     private String status;
     private String view;
+    private long sid;
+
+    public long getSid() {
+        return sid;
+    }
+
+    public void setSid(long sid) {
+        this.sid = sid;
+    }
+
     public static String LIVE_URL = "live_url";
+    public static String SID = "sid";
 
     public String getName() {
         return name;
@@ -73,6 +84,7 @@ public class Profile implements Parcelable {
         dest.writeString(this.url);
         dest.writeString(this.status);
         dest.writeString(this.view);
+        dest.writeLong(this.sid);
     }
 
     protected Profile(Parcel in) {
@@ -81,9 +93,10 @@ public class Profile implements Parcelable {
         this.url = in.readString();
         this.status = in.readString();
         this.view = in.readString();
+        this.sid = in.readLong();
     }
 
-    public static final Parcelable.Creator<Profile> CREATOR = new Parcelable.Creator<Profile>() {
+    public static final Creator<Profile> CREATOR = new Creator<Profile>() {
         @Override
         public Profile createFromParcel(Parcel source) {
             return new Profile(source);

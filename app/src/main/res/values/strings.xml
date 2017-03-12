@@ -28,10 +28,15 @@
     <string name="ion_ios_arrow_right">&#xf3d3;</string>
     <string name="ion_eye">&#xf133;</string>
     <string name="ion_android_close">&#xf2d7;</string>
+    <string name="ion__android_share">&#xf3ac;</string>
 
-    <string name="banner_ad_unit_id">ca-app-pub-9233883698624873/6283597944</string>
-    <string name="app_id">ca-app-pub-9233883698624873~4806864748</string>
-    <string name="facebook_app_id">610207142501123</string>
+    <string name="banner_ad_unit_id">ca-app-pub-9233883698624873/8293761148</string>
+    <string name="app_id">ca-app-pub-9233883698624873~6817027943</string>
+    <string name="firebase_api_key"></string>
+    <string name="fabric_api_key">bafc626ef31c6b132320fbfb402cf45c01ad6e38</string>
+    <string name="facebook_app_id">1720765744807356</string>
+
+    <string name="device_test">C08A07F7B82B34A1998746166B241A3A</string>
 
     <string-array name="nav_item_activity_title">
         <item>Home</item>

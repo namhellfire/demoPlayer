@@ -166,12 +166,11 @@ public class Splash_screen extends AppCompatActivity {
                 String json = gson.toJson(profileOfflines);
                 prefsEditor.putString(ListManager.LIST_ALL, json);
                 prefsEditor.commit();
-                Collections.shuffle(profiles);
                 ArrayList<Profile> newProfile = new ArrayList<>();
                 for (int i = 0; i < 50; i++) {
                     newProfile.add(profiles.get(i));
                 }
-
+                Collections.shuffle(newProfile);
                 Intent intent = new Intent(activity, MainActivity.class);
                 intent.putParcelableArrayListExtra(ListManager.LIST_API, listAPIs);
                 intent.putParcelableArrayListExtra(ListManager.LIST_ALL, newProfile);

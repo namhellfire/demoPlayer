@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.app.letsbigo.API.ConstantAPI;
 import com.app.letsbigo.Activitys.PlayerActivity;
 import com.app.letsbigo.Model.Profile;
+import com.app.letsbigo.Model.ProfileOnline;
 import com.app.letsbigo.R;
 import com.app.letsbigo.Utils.Icon_Manager;
 import com.bumptech.glide.Glide;
@@ -50,13 +51,19 @@ public class OfflineAdapter extends RecyclerView.Adapter<OfflineAdapter.ViewHold
     }
 
     public void remove(int position) {
-        mDataSet.remove(position);
+        profileArrayList.remove(position);
         notifyItemRemoved(position);
     }
 
-    public void add(String text, int position) {
-        mDataSet.add(position, text);
+    public void add(Profile item, int position) {
+        profileArrayList.add(position, item);
         notifyItemInserted(position);
+    }
+
+    public void addItems(ArrayList<Profile> listItem){
+        for (Profile profile : listItem){
+            profileArrayList.add(profile);
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -102,7 +109,9 @@ public class OfflineAdapter extends RecyclerView.Adapter<OfflineAdapter.ViewHold
                 boolean isLive = !url.contains(ConstantAPI.YOUTUBE);
                 if (isLive) {
                     Intent intent = new Intent(activity, PlayerActivity.class);
-                    intent.putExtra(Profile.LIVE_URL, url);
+                    intent.putExtra(ProfileOnline.LIVE_URL, url);
+                    intent.putExtra(ProfileOnline.SID, profileArrayList.get(position).getSid());
+                    intent.putExtra(ProfileOnline.STATUS, profileArrayList.get(position).getStatus());
                     activity.startActivity(intent);
                 } else {
                     activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(profileArrayList.get(position).getUrl())));
@@ -115,9 +124,9 @@ public class OfflineAdapter extends RecyclerView.Adapter<OfflineAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        if (profileArrayList.size() > 50) {
-            return 50;
-        }
+//        if (profileArrayList.size() > 50) {
+//            return 50;
+//        }
         return profileArrayList.size();
     }
 

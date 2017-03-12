@@ -130,25 +130,29 @@ public class UtilConnect {
     }
 
     public static String getAPI(String link) throws IOException {
+        try {
+            URL url = new URL(link);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setReadTimeout(ConstantAPI.TIME_OUT);
 
-        URL url = new URL(link);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestMethod("GET");
-        urlConnection.setReadTimeout(ConstantAPI.TIME_OUT);
+            StringBuilder builder = new StringBuilder();
 
-        StringBuilder builder = new StringBuilder();
-
-        InputStream content = new BufferedInputStream(urlConnection.getInputStream());
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(content));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            builder.append(line);
+            InputStream content = new BufferedInputStream(urlConnection.getInputStream());
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(content));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
+            }
+            Log.e("TAG", "result : " + builder.toString());
+            urlConnection.disconnect();
+            //saveData(context, builder.toString());
+            return builder.toString();
+        } catch (Exception e) {
+            Log.d(TAG,"error connect "+e.getMessage());
         }
-        Log.e("TAG", "result : " + builder.toString());
-        urlConnection.disconnect();
-        //saveData(context, builder.toString());
-        return builder.toString();
+        return null;
     }
 
     public static String getAPI_v1(String link) throws IOException {
@@ -198,6 +202,7 @@ public class UtilConnect {
                 JSONObject object = array.getJSONObject(i);
 
                 ProfileOnline profileOnline = new ProfileOnline();
+                profileOnline.setSid(object.getLong(ProfileOnline.SID));
                 profileOnline.setBig_img(object.getString(ProfileOnline.BIG_IMG));
                 profileOnline.setMedium_img(object.getString(ProfileOnline.MEDIUM_IMG));
                 profileOnline.setSmall_img(object.getString(ProfileOnline.SMALL_IMG));
@@ -290,6 +295,7 @@ public class UtilConnect {
                 profile.setThumbnail(object.getString(ProfileOffline.THUMBNAIL));
                 profile.setUrl(object.getString(ProfileOffline.URL));
                 profile.setView(object.getString(ProfileOffline.VIEW));
+                profile.setSid(Long.valueOf(object.getString(ProfileOffline.ID)));
 
                 profileArrayList.add(profile);
             } catch (JSONException e) {
@@ -311,9 +317,10 @@ public class UtilConnect {
                 Profile profile = new Profile();
                 profile.setName(object.getString(ProfileOnline.NICK_NAME));
                 profile.setStatus(object.getString(ProfileOnline.STATUS));
-                profile.setThumbnail(object.getString(ProfileOnline.BIG_IMG));
+                profile.setThumbnail(object.getString(ProfileOnline.SMALL_IMG));
                 profile.setUrl(object.getString(ProfileOnline.LIVE_URL));
                 profile.setView(object.getString(ProfileOnline.USER_COUNT));
+                profile.setSid(object.getLong(ProfileOnline.SID));
 
                 profileArrayList.add(profile);
             } catch (JSONException e) {

@@ -113,7 +113,7 @@ public class SearchResultsActivity extends AppCompatActivity {
 
         AdView mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice("6AC73B1F3FBABF4DE085E4562BD6F9C6")
+                .addTestDevice(getString(R.string.device_test))
                 .build();
         mAdView.loadAd(adRequest);
 

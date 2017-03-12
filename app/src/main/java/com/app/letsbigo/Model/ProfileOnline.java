@@ -18,6 +18,7 @@ public class ProfileOnline implements Parcelable {
     public static final String ROOM_TOPIC = "room_topic";
     public static final String STATUS = "status";
     public static final String LIVE_URL = "live_url";
+    public static final String SID = "sid";
 
 
     private String medium_img;
@@ -28,9 +29,16 @@ public class ProfileOnline implements Parcelable {
     private String room_topic;
     private String status;
     private String live_url;
-
-
     private String big_img;
+    private long sid;
+
+    public long getSid() {
+        return sid;
+    }
+
+    public void setSid(long sid) {
+        this.sid = sid;
+    }
 
     public String getBig_img() {
         return big_img;
@@ -105,6 +113,9 @@ public class ProfileOnline implements Parcelable {
     }
 
 
+    public ProfileOnline() {
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -121,9 +132,7 @@ public class ProfileOnline implements Parcelable {
         dest.writeString(this.status);
         dest.writeString(this.live_url);
         dest.writeString(this.big_img);
-    }
-
-    public ProfileOnline() {
+        dest.writeLong(this.sid);
     }
 
     protected ProfileOnline(Parcel in) {
@@ -136,9 +145,10 @@ public class ProfileOnline implements Parcelable {
         this.status = in.readString();
         this.live_url = in.readString();
         this.big_img = in.readString();
+        this.sid = in.readLong();
     }
 
-    public static final Parcelable.Creator<ProfileOnline> CREATOR = new Parcelable.Creator<ProfileOnline>() {
+    public static final Creator<ProfileOnline> CREATOR = new Creator<ProfileOnline>() {
         @Override
         public ProfileOnline createFromParcel(Parcel source) {
             return new ProfileOnline(source);

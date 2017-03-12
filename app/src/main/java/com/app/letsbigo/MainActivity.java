@@ -3,6 +3,8 @@ package com.app.letsbigo;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -42,9 +44,11 @@ import com.app.letsbigo.Model.PreferenceShare;
 import com.app.letsbigo.Model.Profile;
 import com.app.letsbigo.Utils.Util;
 import com.facebook.CallbackManager;
+import com.facebook.FacebookSdk;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
@@ -112,40 +116,20 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         // ------------------ sdk facebook ------------
-//        FacebookSdk.sdkInitialize(getApplicationContext());
-//        callbackManager = CallbackManager.Factory.create();
-//        shareDialog = new ShareDialog(this);
-//        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
-//            @Override
-//            public void onSuccess(Sharer.Result result) {
-//
-//            }
-//
-//            @Override
-//            public void onCancel() {
-//
-//            }
-//
-//            @Override
-//            public void onError(FacebookException error) {
-//
-//            }
-//        });
-//
-//        try {
-//            PackageInfo info = getPackageManager().getPackageInfo(
-//                    "com.facebook.samples.hellofacebook",
-//                    PackageManager.GET_SIGNATURES);
-//            for (Signature signature : info.signatures) {
-//                MessageDigest md = MessageDigest.getInstance("SHA");
-//                md.update(signature.toByteArray());
-//                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-//            }
-//        } catch (PackageManager.NameNotFoundException e) {
-//
-//        } catch (NoSuchAlgorithmException e) {
-//
-//        }
+        FacebookSdk.sdkInitialize(getApplicationContext());
+
+
+
+        try {
+            PackageManager manager = this.getPackageManager();
+            PackageInfo info = null;
+            info = manager.getPackageInfo(
+                    this.getPackageName(), 0);
+            String version = info.versionName;
+            Log.d(TAG,"version app : "+ version);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -175,11 +159,37 @@ public class MainActivity extends AppCompatActivity
 
         AdView mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice("6AC73B1F3FBABF4DE085E4562BD6F9C6")
+                .addTestDevice(getString(R.string.device_test))
                 .build();
         mAdView.loadAd(adRequest);
 
-//        mAdView.setVisibility(View.GONE);
+        mAdView.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                super.onAdClosed();
+            }
+
+            @Override
+            public void onAdFailedToLoad(int i) {
+                super.onAdFailedToLoad(i);
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                super.onAdLeftApplication();
+            }
+
+            @Override
+            public void onAdOpened() {
+                super.onAdOpened();
+            }
+
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+            }
+        });
+
 
         mIntent = getIntent();
         listAPIs = mIntent.getParcelableArrayListExtra(ListManager.LIST_API);
@@ -224,6 +234,14 @@ public class MainActivity extends AppCompatActivity
             asyncListOnline = new AsyncListOnline(this, avi);
         }
 
+
+
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         if (share.getPreferenceBooleanValue(FIRST_RUN)) {
             CURRENT_TAG = TAG_HOME_FRAGMENT;
             navItemSelected = 0;
@@ -237,13 +255,6 @@ public class MainActivity extends AppCompatActivity
         } else {
 
         }
-
-    }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
     }
 
     @Override
@@ -442,12 +453,6 @@ public class MainActivity extends AppCompatActivity
 
             takeScreenshot();
 
-//            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-//            sharingIntent.setType("text/plain");
-//            String shareBody = "Here is the share content body";
-//            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
-//            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
-//            startActivity(Intent.createChooser(sharingIntent, "Share via"));
             return true;
         } else if (id == R.id.nav_rate) {
             Intent intent = Util.getOpenRateIntent(getApplicationContext());
@@ -560,35 +565,7 @@ public class MainActivity extends AppCompatActivity
 
 
     public Fragment getPageFragment() {
-//        switch (navItemSelected) {
-//            case 0:
-////                Home_fragment homeFragment = new Home_fragment();
-////                return homeFragment;
-//            case 1:
-////                New_fragment newFragment = new New_fragment();
-////                return newFragment;
-//            case 2:
-////                Top_Fragment topFragment = new Top_Fragment();
-////                return topFragment;
-//                MainFragment mainFragment = new MainFragment();
-//                return mainFragment;
-//            case 3:
-////                Intent intent = new Intent(this, PlayerActivity.class);
-////                startActivity(intent);
-////                Online_fragment onlineFragment = new Online_fragment();
-////                Bundle bundle = new Bundle();
-////                bundle.putParcelableArrayList(ListManager.LIST_API, listAPIs);
-////                onlineFragment.setArguments(bundle);
-////                return onlineFragment;
-//                MainFragment mainFragment = new MainFragment();
-//                return mainFragment;
-//            default:
         return new MainFragment();
-//        }
-    }
-
-    public void loadDataFirstTime() {
-
     }
 
     public void LoadListOnline() {

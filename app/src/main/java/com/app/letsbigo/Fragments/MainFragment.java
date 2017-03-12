@@ -1,9 +1,11 @@
 package com.app.letsbigo.Fragments;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -11,6 +13,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +24,12 @@ import com.app.letsbigo.Adapter.OfflineAdapter;
 import com.app.letsbigo.Adapter.SpacesItemDecoration;
 import com.app.letsbigo.MainActivity;
 import com.app.letsbigo.Model.Profile;
+import com.app.letsbigo.Model.ProfileOffline;
 import com.app.letsbigo.R;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
@@ -57,9 +64,13 @@ public class MainFragment extends Fragment {
     private GridLayoutManager gridLayoutManager;
     private OfflineAdapter offlineAdapter;
     private ArrayList<Profile> arrayList;
+    private ArrayList<ProfileOffline> profileOffAll;
 
     private ActionBar actionBar;
+    private boolean isLoading;
 
+    private android.os.Handler handler;
+    private int page = 1;
     private boolean loading = true;
     int pastVisiblesItems, visibleItemCount, totalItemCount;
 
@@ -68,14 +79,6 @@ public class MainFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MainFragment.
-     */
     // TODO: Rename and change types and number of parameters
     public static MainFragment newInstance(String api, String param2) {
         MainFragment fragment = new MainFragment();
@@ -98,19 +101,30 @@ public class MainFragment extends Fragment {
         }
         arrayList = new ArrayList<>();
         arrayList = getArguments().getParcelableArrayList(ListManager.DATA_CONTENT);
+        isLoading = false;
+        handler = new android.os.Handler();
+        SharedPreferences appSharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(getActivity());
+        Gson gson = new Gson();
+        String json = appSharedPrefs.getString(ListManager.LIST_ALL, "");
+
+        Type type = new TypeToken<ArrayList<ProfileOffline>>() {
+        }.getType();
+        profileOffAll = gson.fromJson(json, type);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+        actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        Log.d(TAG,"page : "+page);
         View v = inflater.inflate(R.layout.fragment_top, container, false);
         int currentOrientation = getResources().getConfiguration().orientation;
         if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -141,6 +155,7 @@ public class MainFragment extends Fragment {
 
         mListview.addOnScrollListener(new RecyclerView.OnScrollListener() {
             int mLastFirstVisibleItem = 0;
+
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -149,22 +164,22 @@ public class MainFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
+
                 final int currentFirstVisibleItem = gridLayoutManager.findFirstVisibleItemPosition();
                 final int currentLastVisibleItem = gridLayoutManager.findLastVisibleItemPosition();
-//
-//                if (currentFirstVisibleItem > this.mLastFirstVisibleItem) {
-////                    getActivity().getSupportActionBar().hide();
-//                    actionBar.hide();
-//                } else if (currentFirstVisibleItem + 1 < this.mLastFirstVisibleItem) {
-////                    getActivity().getSupportActionBar().show();
-//                    actionBar.show();
-//                }
-//
-                if (currentLastVisibleItem == (offlineAdapter.getItemCount()-1)){
-                    mListview.setPadding(0,0,0,150);
+                Log.d(TAG, "onscroll currentFirstVisibleItem : " + currentFirstVisibleItem + " currentLastVisibleItem : " + currentLastVisibleItem);
+
+                if (currentLastVisibleItem == (offlineAdapter.getItemCount() - 1)) {
+
+                    if (!isLoading) {
+                        onLoadMore();
+                    }
+
+                    mListview.setPadding(0, 0, 0, 150);
                     mListview.requestLayout();
-                }else if (currentLastVisibleItem == (offlineAdapter.getItemCount()-3)){
-                    mListview.setPadding(0,0,0,0);
+                } else if (currentLastVisibleItem == (offlineAdapter.getItemCount() - 3)) {
+                    mListview.setPadding(0, 0, 0, 0);
                     mListview.requestLayout();
                 }
 
@@ -178,6 +193,42 @@ public class MainFragment extends Fragment {
     public void refreshList() {
         MainActivity ac = (MainActivity) getActivity();
         ac.reLoadPage();
+    }
+
+    public void onLoadMore() {
+        Log.d(TAG, "On Load More");
+        isLoading = true;
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                int size = 0;
+                ArrayList<Profile> arrayList = new ArrayList<Profile>();
+                if ((page + 1) * 50 > profileOffAll.size()) {
+                    size = profileOffAll.size();
+                } else {
+                    size = (page + 1) * 50;
+                }
+
+                for (int i = page * 50; i < size; i++) {
+                    Log.d(TAG, "On Load More profile : " + profileOffAll.get(i).getName());
+                    Profile profile = new Profile();
+                    profile.setSid(profileOffAll.get(i).getId());
+                    profile.setName(profileOffAll.get(i).getName());
+                    profile.setStatus(profileOffAll.get(i).getDescription());
+                    profile.setThumbnail(profileOffAll.get(i).getThumbnail());
+                    profile.setUrl(profileOffAll.get(i).getUrl());
+                    profile.setView(profileOffAll.get(i).getView());
+
+                    arrayList.add(profile);
+                }
+                offlineAdapter.addItems(arrayList);
+                offlineAdapter.notifyDataSetChanged();
+
+                page++;
+                isLoading = false;
+            }
+        }, 100);
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event

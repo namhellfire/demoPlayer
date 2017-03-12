@@ -14,12 +14,15 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.app.letsbigo.Model.Profile;
+import com.app.letsbigo.API.ConstantAPI;
+import com.app.letsbigo.Model.ProfileOnline;
 import com.app.letsbigo.Player.DemoApplication;
 import com.app.letsbigo.Player.EventLogger;
 import com.app.letsbigo.R;
 import com.app.letsbigo.Utils.Icon_Manager;
 import com.app.letsbigo.Utils.UtilConnect;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareDialog;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -50,8 +53,9 @@ import com.google.android.gms.ads.AdView;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.IOException;
+import java.util.List;
 
-public class PlayerActivity extends AppCompatActivity implements PlaybackControlView.VisibilityListener, ExoPlayer.EventListener {
+public class PlayerActivity extends AppCompatActivity implements PlaybackControlView.VisibilityListener, ExoPlayer.EventListener, View.OnClickListener {
 
     private final String TAG = "PlayerActivity";
     private Icon_Manager icon_manager;
@@ -59,16 +63,32 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
     SimpleExoPlayerView exoPlayerView;
     private Handler mainHandler;
     private EventLogger eventLogger;
-    private TextView iconClose;
+    private TextView iconClose, iconShare;
     private DataSource.Factory mediaDataSourceFactory;
     private SimpleExoPlayer player;
     private AVLoadingIndicatorView avi;
     private DefaultTrackSelector trackSelector;
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
 
+    private String url, status, url_live;
+    private Long sid;
+
+    private MediaSource mediaSource;
+
+    AsyncGetLink asyncGetLink;
+
+    private int resumeWindow;
+    private long resumePosition;
+
+
+    private ShareDialog shareDialog;
+    private boolean shouldAutoPlay;
+    private boolean isStop = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isStop = false;
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -78,8 +98,23 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
 
         getSupportActionBar().hide();
 
-        Intent intent = getIntent();
-        String url = intent.getStringExtra(Profile.LIVE_URL);
+
+        try {
+            Uri data = getIntent().getData();
+            String scheme = data.getScheme(); // "http"
+            String host = data.getHost(); // "twitter.com"
+            List<String> params = data.getPathSegments();
+            String first = params.get(0); // "status"
+            String second = params.get(1); // "1234"
+            Log.d(TAG,"into app");
+
+        } catch (Exception e) {
+            Intent intent = getIntent();
+            url = intent.getStringExtra(ProfileOnline.LIVE_URL);
+            sid = intent.getLongExtra(ProfileOnline.SID, 0);
+            status = intent.getStringExtra(ProfileOnline.STATUS);
+            Log.d(TAG,"don't into app");
+        }
 
 
         mediaDataSourceFactory = buildDataSourceFactory(true);
@@ -92,12 +127,16 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
 
         final AdView mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice("6AC73B1F3FBABF4DE085E4562BD6F9C6")
+                .addTestDevice(getString(R.string.device_test))
                 .build();
         mAdView.loadAd(adRequest);
 
         iconClose = (TextView) findViewById(R.id.iconClose);
         iconClose.setTypeface(icon_manager.get_icons("fonts/ionicons.ttf", this));
+        iconShare = (TextView) findViewById(R.id.iconShare);
+        iconShare.setTypeface(icon_manager.get_icons("fonts/ionicons.ttf", this));
+
+        iconShare.setOnClickListener(this);
 
         iconClose.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,10 +148,11 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
 
         avi = (AVLoadingIndicatorView) findViewById(R.id.avi);
 
-        AsyncGetLink asyncGetLink = new AsyncGetLink();
+
+        shareDialog = new ShareDialog(this);
+
+        asyncGetLink = new AsyncGetLink();
         asyncGetLink.execute(url);
-
-
     }
 
 
@@ -132,56 +172,78 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
     @Override
     public void onStart() {
         super.onStart();
-        if (Util.SDK_INT > 23) {
-//            initializePlayer();
-        }
+        Log.d(TAG, "onStart");
+//        if (Util.SDK_INT > 23 || player == null && isStop) {
+//            initPlayer(url_live);
+//        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-//        if ((Util.SDK_INT <= 23 || player == null)) {
-//            initializePlayer();
-//        }
+        Log.d(TAG, "onResume");
+        if ( player == null && isStop) {
+            initPlayer(url_live);
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (Util.SDK_INT <= 23) {
-            releasePlayer();
-        }
+//        Log.d(TAG, "onPause");
+//        if (Util.SDK_INT <= 23) {
+//            releasePlayer();
+//        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (Util.SDK_INT > 23) {
+        Log.d(TAG, "onStop");
+//        if (Util.SDK_INT > 23) {
             releasePlayer();
-        }
+//        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        asyncGetLink.cancel(true);
+        asyncGetLink = null;
     }
 
     public void initPlayer(String url) {
         Log.d(TAG, "link video live : " + url);
-        TrackSelection.Factory videoTrackSelectionFactory =
-                new AdaptiveVideoTrackSelection.Factory(BANDWIDTH_METER);
-        trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-        player = ExoPlayerFactory.newSimpleInstance(this, trackSelector, new DefaultLoadControl());
-        player.addListener(this);
+        isStop = false;
+        if (player == null){
+            TrackSelection.Factory videoTrackSelectionFactory =
+                    new AdaptiveVideoTrackSelection.Factory(BANDWIDTH_METER);
+            trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+            player = ExoPlayerFactory.newSimpleInstance(this, trackSelector, new DefaultLoadControl());
+            player.addListener(this);
 
-        eventLogger = new EventLogger(trackSelector);
-        player.addListener(eventLogger);
-        player.setAudioDebugListener(eventLogger);
-        player.setVideoDebugListener(eventLogger);
-        player.setMetadataOutput(eventLogger);
-        player.setPlayWhenReady(true);
+            eventLogger = new EventLogger(trackSelector);
+            player.addListener(eventLogger);
+            player.setAudioDebugListener(eventLogger);
+            player.setVideoDebugListener(eventLogger);
+            player.setMetadataOutput(eventLogger);
+            player.setPlayWhenReady(true);
 
-        exoPlayerView.setPlayer(player);
+            exoPlayerView.setPlayer(player);
 
-        Uri uri = Uri.parse(url);
-        MediaSource mediaSource = buildMediaSource(uri, null);
-        player.prepare(mediaSource, false, false);
+            Uri uri = Uri.parse(url);
+            mediaSource = buildMediaSource(uri, null);
+        }
+
+        if (mediaSource != null && player != null){
+            player.prepare(mediaSource);
+        }else {
+            Toast.makeText(getApplicationContext(), getString(R.string.live_ended), Toast.LENGTH_SHORT).show();
+            this.finish();
+        }
+
     }
+
 
     @Override
     public void onTimelineChanged(Timeline timeline, Object manifest) {
@@ -219,9 +281,11 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
 
     @Override
     public void onPlayerError(ExoPlaybackException error) {
-        Log.d(TAG, "onPlayerError : " + error);
-        Toast.makeText(getApplicationContext(), getString(R.string.live_ended), Toast.LENGTH_SHORT).show();
-        this.finish();
+        Log.d(TAG, "onPlayerError : " + error.getMessage()+" error type "+error.type);
+//        Toast.makeText(getApplicationContext(), getString(R.string.live_ended), Toast.LENGTH_SHORT).show();
+        releasePlayer();
+        initPlayer(url_live);
+//        this.finish();
     }
 
     @Override
@@ -244,6 +308,7 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
     private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
         int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
                 : uri.getLastPathSegment());
+        Log.d(TAG,"video type: "+type);
         switch (type) {
             case C.TYPE_SS:
                 return new SsMediaSource(uri, buildDataSourceFactory(false),
@@ -257,24 +322,12 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
                 return new ExtractorMediaSource(uri, mediaDataSourceFactory, new DefaultExtractorsFactory(),
                         mainHandler, eventLogger);
             default: {
+                Log.d(TAG,"Unsupported type: "+type);
                 throw new IllegalStateException("Unsupported type: " + type);
             }
         }
     }
 
-    private void releasePlayer() {
-        if (player != null) {
-//            debugViewHelper.stop();
-//            debugViewHelper = null;
-//            shouldAutoPlay = player.getPlayWhenReady();
-//            updateResumePosition();
-            player.release();
-            player = null;
-            trackSelector = null;
-//            trackSelectionHelper = null;
-            eventLogger = null;
-        }
-    }
 
     void startAnim() {
         avi.show();
@@ -284,6 +337,16 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
     void stopAnim() {
         avi.hide();
         // or avi.smoothToHide();
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        switch (id) {
+            case R.id.iconShare:
+                shareFacebook();
+                break;
+        }
     }
 
 
@@ -313,6 +376,7 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             if (s != null && !s.trim().isEmpty()) {
+                url_live = s;
                 initPlayer(s);
             } else {
                 Toast.makeText(getApplicationContext(), getString(R.string.live_ended), Toast.LENGTH_SHORT).show();
@@ -323,4 +387,48 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
 
     }
 
+
+    private void updateResumePosition() {
+        resumeWindow = player.getCurrentWindowIndex();
+        resumePosition = player.isCurrentWindowSeekable() ? Math.max(0, player.getCurrentPosition())
+                : C.TIME_UNSET;
+    }
+
+    private void clearResumePosition() {
+        resumeWindow = C.INDEX_UNSET;
+        resumePosition = C.TIME_UNSET;
+    }
+
+    private void releasePlayer() {
+        if (player != null) {
+//            clearResumePosition();
+//            debugViewHelper.stop();
+//            debugViewHelper = null;
+            isStop = true;
+            shouldAutoPlay = player.getPlayWhenReady();
+//            updateResumePosition();
+            player.release();
+            player = null;
+            trackSelector = null;
+//            trackSelectionHelper = null;
+            eventLogger = null;
+        }
+    }
+
+    private void shareFacebook() {
+        ShareLinkContent content = new ShareLinkContent.Builder()
+                .setContentUrl(Uri.parse(ConstantAPI.link_share_online + sid))
+                .setQuote(status)
+                .build();
+        if (shareDialog != null) {
+//                shareDialog.canShow(content, ShareDialog.Mode.AUTOMATIC);
+            shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 }

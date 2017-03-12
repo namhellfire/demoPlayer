@@ -6,7 +6,7 @@ package com.app.letsbigo.API;
 
 public class ConstantAPI {
 
-    public static final int TIME_OUT = 2000;
+    public static final int TIME_OUT = 60000;
 
     public static final String SERVER = "http://static.letsbigo.com/";
     // ------ list API --------
@@ -20,5 +20,9 @@ public class ConstantAPI {
     public static final String FACEBOOK_PAGE = "https://www.facebook.com/letsbigo";
     public static final String YOUTUBE_CHANNEL = "https://www.youtube.com/c/Letsbigo";
     public static final String YOUTUBE = "www.youtube.com";
+
+    //
+    public static final String link_share_online = "http://letsbigo.com/live/";
+    public static final String link_share_offline = "http://video.letsbigo.com/watch?v=";
 
 }

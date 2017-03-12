@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.app.letsbigo.Activitys.PlayerActivity;
-import com.app.letsbigo.Model.Profile;
 import com.app.letsbigo.Model.ProfileOnline;
 import com.app.letsbigo.R;
 import com.bumptech.glide.Glide;
@@ -43,7 +42,9 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(activity, PlayerActivity.class);
-                intent.putExtra(Profile.LIVE_URL, onlineArrayList.get(position).getLive_url());
+                intent.putExtra(ProfileOnline.LIVE_URL, onlineArrayList.get(position).getLive_url());
+                intent.putExtra(ProfileOnline.SID,onlineArrayList.get(position).getSid());
+                intent.putExtra(ProfileOnline.STATUS,onlineArrayList.get(position).getStatus());
                 activity.startActivity(intent);
             }
         });
