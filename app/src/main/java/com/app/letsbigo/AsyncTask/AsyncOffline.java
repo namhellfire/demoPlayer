@@ -47,7 +47,9 @@ public class AsyncOffline extends AsyncTask<String, String, ArrayList<Profile>> 
         try {
             String result = UtilConnect.getAPI(strings[0]);
             profileArrayList = UtilConnect.ParseJsonProfile(new JSONArray(result));
-            Collections.shuffle(profileArrayList);
+            if (MainActivity.CURRENT_TAG.equalsIgnoreCase(MainActivity.TAG_HOME_FRAGMENT)){
+                Collections.shuffle(profileArrayList);
+            }
             return profileArrayList;
         } catch (IOException e) {
             e.printStackTrace();

@@ -24,7 +24,6 @@ import com.app.letsbigo.Adapter.OfflineAdapter;
 import com.app.letsbigo.Adapter.SpacesItemDecoration;
 import com.app.letsbigo.MainActivity;
 import com.app.letsbigo.Model.Profile;
-import com.app.letsbigo.Model.ProfileOffline;
 import com.app.letsbigo.R;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -64,7 +63,7 @@ public class MainFragment extends Fragment {
     private GridLayoutManager gridLayoutManager;
     private OfflineAdapter offlineAdapter;
     private ArrayList<Profile> arrayList;
-    private ArrayList<ProfileOffline> profileOffAll;
+    private ArrayList<Profile> profileOffAll;
 
     private ActionBar actionBar;
     private boolean isLoading;
@@ -95,6 +94,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG,"oncreate");
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -103,14 +103,17 @@ public class MainFragment extends Fragment {
         arrayList = getArguments().getParcelableArrayList(ListManager.DATA_CONTENT);
         isLoading = false;
         handler = new android.os.Handler();
-        SharedPreferences appSharedPrefs = PreferenceManager
-                .getDefaultSharedPreferences(getActivity());
-        Gson gson = new Gson();
-        String json = appSharedPrefs.getString(ListManager.LIST_ALL, "");
+        if (MainActivity.CURRENT_TAG.equalsIgnoreCase(MainActivity.TAG_HOME_FRAGMENT)){
+            SharedPreferences appSharedPrefs = PreferenceManager
+                    .getDefaultSharedPreferences(getActivity());
+            Gson gson = new Gson();
+            String json = appSharedPrefs.getString(ListManager.LIST_ALL, "");
 
-        Type type = new TypeToken<ArrayList<ProfileOffline>>() {
-        }.getType();
-        profileOffAll = gson.fromJson(json, type);
+            Type type = new TypeToken<ArrayList<Profile>>() {
+            }.getType();
+            profileOffAll = gson.fromJson(json, type);
+        }
+
     }
 
     @Override
@@ -168,11 +171,11 @@ public class MainFragment extends Fragment {
 
                 final int currentFirstVisibleItem = gridLayoutManager.findFirstVisibleItemPosition();
                 final int currentLastVisibleItem = gridLayoutManager.findLastVisibleItemPosition();
-                Log.d(TAG, "onscroll currentFirstVisibleItem : " + currentFirstVisibleItem + " currentLastVisibleItem : " + currentLastVisibleItem);
+//                Log.d(TAG, "onscroll currentFirstVisibleItem : " + currentFirstVisibleItem + " currentLastVisibleItem : " + currentLastVisibleItem);
 
                 if (currentLastVisibleItem == (offlineAdapter.getItemCount() - 1)) {
 
-                    if (!isLoading) {
+                    if (!isLoading && MainActivity.CURRENT_TAG.equalsIgnoreCase(MainActivity.TAG_HOME_FRAGMENT)) {
                         onLoadMore();
                     }
 
@@ -210,19 +213,10 @@ public class MainFragment extends Fragment {
                 }
 
                 for (int i = page * 50; i < size; i++) {
-                    Log.d(TAG, "On Load More profile : " + profileOffAll.get(i).getName());
-                    Profile profile = new Profile();
-                    profile.setSid(profileOffAll.get(i).getId());
-                    profile.setName(profileOffAll.get(i).getName());
-                    profile.setStatus(profileOffAll.get(i).getDescription());
-                    profile.setThumbnail(profileOffAll.get(i).getThumbnail());
-                    profile.setUrl(profileOffAll.get(i).getUrl());
-                    profile.setView(profileOffAll.get(i).getView());
-
-                    arrayList.add(profile);
+                    arrayList.add(profileOffAll.get(i));
                 }
                 offlineAdapter.addItems(arrayList);
-                offlineAdapter.notifyDataSetChanged();
+//                offlineAdapter.notifyDataSetChanged();
 
                 page++;
                 isLoading = false;

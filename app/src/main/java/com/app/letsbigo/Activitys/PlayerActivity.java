@@ -145,6 +145,7 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
                 iconClose.setVisibility(View.GONE);
             }
         });
+        iconClose.setVisibility(View.GONE);
 
         avi = (AVLoadingIndicatorView) findViewById(R.id.avi);
 
@@ -284,8 +285,10 @@ public class PlayerActivity extends AppCompatActivity implements PlaybackControl
         Log.d(TAG, "onPlayerError : " + error.getMessage()+" error type "+error.type);
 //        Toast.makeText(getApplicationContext(), getString(R.string.live_ended), Toast.LENGTH_SHORT).show();
         releasePlayer();
-        initPlayer(url_live);
+//        initPlayer(url_live);
 //        this.finish();
+        asyncGetLink = new AsyncGetLink();
+        asyncGetLink.execute(url);
     }
 
     @Override

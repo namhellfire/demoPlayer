@@ -19,7 +19,6 @@ import com.app.letsbigo.API.ListManager;
 import com.app.letsbigo.Adapter.OfflineAdapter;
 import com.app.letsbigo.Adapter.SpacesItemDecoration;
 import com.app.letsbigo.Model.Profile;
-import com.app.letsbigo.Model.ProfileOffline;
 import com.app.letsbigo.R;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -42,7 +41,7 @@ public class SearchResultsActivity extends AppCompatActivity {
     private OfflineAdapter offlineAdapter;
     private GridLayoutManager gridLayoutManager;
 
-    private ArrayList<ProfileOffline> profileOfflines;
+    private ArrayList<Profile> listProfile;
     private ArrayList<Profile> listSearch;
 
     @Override
@@ -97,7 +96,7 @@ public class SearchResultsActivity extends AppCompatActivity {
             }
         });
 
-        profileOfflines = new ArrayList<>();
+        listProfile = new ArrayList<>();
 
 
         SharedPreferences appSharedPrefs = PreferenceManager
@@ -105,9 +104,9 @@ public class SearchResultsActivity extends AppCompatActivity {
         Gson gson = new Gson();
         String json = appSharedPrefs.getString(ListManager.LIST_ALL, "");
 
-        Type type = new TypeToken<ArrayList<ProfileOffline>>() {
+        Type type = new TypeToken<ArrayList<Profile>>() {
         }.getType();
-        profileOfflines = gson.fromJson(json, type);
+        listProfile = gson.fromJson(json, type);
 
         MobileAds.initialize(getApplicationContext(), getString(R.string.app_id));
 
@@ -137,22 +136,14 @@ public class SearchResultsActivity extends AppCompatActivity {
         Log.d(TAG, "query search = " + query);
         listSearch = new ArrayList<>();
 
-        for (int i = 0; i < profileOfflines.size(); i++) {
-            ProfileOffline profileOffline = profileOfflines.get(i);
-            String name = profileOffline.getName();
-            String desc = profileOffline.getDescription();
-            String tag = profileOffline.getTag();
-            String view = profileOffline.getView();
-            String thumbnail = profileOffline.getThumbnail();
-            String url = profileOffline.getUrl();
-            if (name.contains(query) || desc.contains(query) || tag.contains(query)) {
-                Profile profile = new Profile();
-                profile.setView(view);
-                profile.setThumbnail(thumbnail);
-                profile.setStatus(desc);
-                profile.setName(name);
-                profile.setUrl(url);
-
+        for (int i = 0; i < listProfile.size(); i++) {
+            Profile profile = listProfile.get(i);
+            String name = profile.getName();
+            String desc = profile.getStatus();
+            String view = profile.getView();
+            String thumbnail = profile.getThumbnail();
+            String url = profile.getUrl();
+            if (name.contains(query) || desc.contains(query)) {
                 listSearch.add(profile);
             }
         }

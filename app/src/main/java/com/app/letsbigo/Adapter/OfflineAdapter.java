@@ -60,10 +60,11 @@ public class OfflineAdapter extends RecyclerView.Adapter<OfflineAdapter.ViewHold
         notifyItemInserted(position);
     }
 
-    public void addItems(ArrayList<Profile> listItem){
-        for (Profile profile : listItem){
+    public void addItems(ArrayList<Profile> listItem) {
+        for (Profile profile : listItem) {
             profileArrayList.add(profile);
         }
+        notifyDataSetChanged();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

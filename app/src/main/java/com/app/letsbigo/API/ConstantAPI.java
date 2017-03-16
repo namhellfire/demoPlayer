@@ -25,4 +25,6 @@ public class ConstantAPI {
     public static final String link_share_online = "http://letsbigo.com/live/";
     public static final String link_share_offline = "http://video.letsbigo.com/watch?v=";
 
+    public static boolean isService = false;
+
 }

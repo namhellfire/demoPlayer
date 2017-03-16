@@ -317,7 +317,7 @@ public class UtilConnect {
                 Profile profile = new Profile();
                 profile.setName(object.getString(ProfileOnline.NICK_NAME));
                 profile.setStatus(object.getString(ProfileOnline.STATUS));
-                profile.setThumbnail(object.getString(ProfileOnline.SMALL_IMG));
+                profile.setThumbnail(object.getString(ProfileOnline.BIG_IMG));
                 profile.setUrl(object.getString(ProfileOnline.LIVE_URL));
                 profile.setView(object.getString(ProfileOnline.USER_COUNT));
                 profile.setSid(object.getLong(ProfileOnline.SID));

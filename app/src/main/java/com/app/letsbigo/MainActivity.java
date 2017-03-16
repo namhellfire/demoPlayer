@@ -3,8 +3,7 @@ package com.app.letsbigo;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -12,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -42,6 +42,7 @@ import com.app.letsbigo.Fragments.Online_fragment;
 import com.app.letsbigo.Model.ListAPI;
 import com.app.letsbigo.Model.PreferenceShare;
 import com.app.letsbigo.Model.Profile;
+import com.app.letsbigo.MyService.MyService;
 import com.app.letsbigo.Utils.Util;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
@@ -52,9 +53,13 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.wang.avi.AVLoadingIndicatorView;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 
 import static com.app.letsbigo.R.menu.main;
@@ -73,10 +78,13 @@ public class MainActivity extends AppCompatActivity
     private AVLoadingIndicatorView avi;
     private RelativeLayout loading;
     private ArrayList<Profile> dataContent = new ArrayList<>();
+    private ArrayList<Profile> listDataAll = new ArrayList<>();
     private AsyncOffline asyncOffline;
     private AsyncListOnline asyncListOnline;
     private RelativeLayout layout_no_network;
     private Button btnRetry;
+
+    private FragmentTransaction fragmentTransaction;
 
 
     public static final String TAG_TOP_FRAGMENT = "TopFragment";
@@ -119,17 +127,18 @@ public class MainActivity extends AppCompatActivity
         FacebookSdk.sdkInitialize(getApplicationContext());
 
 
+//        try {
+//            PackageManager manager = this.getPackageManager();
+//            PackageInfo info = null;
+//            info = manager.getPackageInfo(
+//                    this.getPackageName(), 0);
+//            String version = info.versionName;
+//            Log.d(TAG,"version app : "+ version);
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
 
-        try {
-            PackageManager manager = this.getPackageManager();
-            PackageInfo info = null;
-            info = manager.getPackageInfo(
-                    this.getPackageName(), 0);
-            String version = info.versionName;
-            Log.d(TAG,"version app : "+ version);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
+//        onNewIntent(getIntent());
 
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -192,7 +201,7 @@ public class MainActivity extends AppCompatActivity
 
 
         mIntent = getIntent();
-        listAPIs = mIntent.getParcelableArrayListExtra(ListManager.LIST_API);
+//        listAPIs = mIntent.getParcelableArrayListExtra(ListManager.LIST_API);
 
         ActivityTitle = getResources().getStringArray(R.array.nav_item_activity_title);
         mHandler = new Handler();
@@ -235,7 +244,6 @@ public class MainActivity extends AppCompatActivity
         }
 
 
-
     }
 
 
@@ -243,17 +251,49 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         if (share.getPreferenceBooleanValue(FIRST_RUN)) {
-            CURRENT_TAG = TAG_HOME_FRAGMENT;
-            navItemSelected = 0;
-            ApiUrl = ConstantAPI.API_LIST_ALL;
+            if (ConstantAPI.isService) {
+                CURRENT_TAG = TAG_NEW_FRAGMENT;
+                navItemSelected = 1;
+                ApiUrl = ConstantAPI.API_LIST_NEW;
+            } else {
+                CURRENT_TAG = TAG_HOME_FRAGMENT;
+                navItemSelected = 0;
+                ApiUrl = ConstantAPI.API_LIST_ALL;
+            }
 
-            ArrayList<Profile> profiles = new ArrayList<>();
-            profiles = this.getIntent().getParcelableArrayListExtra(ListManager.LIST_ALL);
-            loadPageFragment(profiles);
+
+            loadDataContent();
 
             share.setPreferenceBooleanValue(FIRST_RUN, false);
+
+            Intent intent = new Intent(MainActivity.this, MyService.class);
+            startService(intent);
+
         } else {
 
+        }
+
+
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            Log.d(TAG, "onNewIntent");
+            if (extras.containsKey("NotificationMessage")) {
+//                String msg = extras.getString("NotificationMessage");
+//                Log.d(TAG, "onNewIntent " + msg);
+//
+//                CURRENT_TAG = TAG_NEW_FRAGMENT;
+//                navItemSelected = 1;
+//                ApiUrl = ConstantAPI.API_LIST_NEW;
+//
+//                AsyncOffline asyncOffline_service = new AsyncOffline(this, avi);
+//                asyncOffline_service.execute(MainActivity.ApiUrl);
+
+            }
         }
     }
 
@@ -409,8 +449,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
 
-        if (!Util.isNetworkAvailable(this)){
-            Toast.makeText(this,R.string.no_internet,Toast.LENGTH_SHORT).show();
+        if (!Util.isNetworkAvailable(this)) {
+            Toast.makeText(this, R.string.no_internet, Toast.LENGTH_SHORT).show();
             return true;
         }
 
@@ -515,7 +555,7 @@ public class MainActivity extends AppCompatActivity
                 Bundle bundle = new Bundle();
                 bundle.putParcelableArrayList(ListManager.DATA_CONTENT, dataContent);
                 fragment.setArguments(bundle);
-                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
 //                fragmentTransaction.commitAllowingStateLoss();
                 fragmentTransaction.commit();
@@ -586,19 +626,66 @@ public class MainActivity extends AppCompatActivity
 
     public void loadDataContent() {
         Log.d(TAG, "link API : " + ApiUrl);
-        if (!asyncListOnline.isCancelled() && asyncListOnline != null) {
-            asyncOffline.cancel(true);
+
+        if (CURRENT_TAG.equalsIgnoreCase(TAG_HOME_FRAGMENT)) {
+            loadDataHome();
+            return;
         }
-        if (asyncOffline.isCancelled()) {
-            asyncOffline = null;
-            asyncOffline = new AsyncOffline(this, avi);
-            asyncOffline.execute(MainActivity.ApiUrl);
+
+        if (asyncListOnline != null) {
+            if (!asyncListOnline.isCancelled()) {
+                asyncOffline.cancel(true);
+            }
+        }
+
+        if (asyncOffline != null) {
+            if (asyncOffline.isCancelled()) {
+                asyncOffline = null;
+                asyncOffline = new AsyncOffline(this, avi);
+                asyncOffline.execute(MainActivity.ApiUrl);
+            } else {
+                asyncOffline.cancel(true);
+                asyncOffline = null;
+                asyncOffline = new AsyncOffline(this, avi);
+                asyncOffline.execute(MainActivity.ApiUrl);
+            }
         } else {
-            asyncOffline.cancel(true);
-            asyncOffline = null;
-            asyncOffline = new AsyncOffline(this, avi);
+            asyncListOnline = new AsyncListOnline(this, avi);
             asyncOffline.execute(MainActivity.ApiUrl);
         }
+
+    }
+
+    public void loadDataHome() {
+
+
+        if (listDataAll == null || listDataAll.size() <= 0) {
+            SharedPreferences appSharedPrefs = PreferenceManager
+                    .getDefaultSharedPreferences(this.getApplicationContext());
+            Gson gson = new Gson();
+            String jsonAll = appSharedPrefs.getString(ListManager.LIST_ALL, "");
+            String jsonAPI = appSharedPrefs.getString(ListManager.LIST_API, "");
+
+            Type typeAll = new TypeToken<ArrayList<Profile>>() {
+            }.getType();
+            listDataAll = gson.fromJson(jsonAll, typeAll);
+
+            Type typeAPI = new TypeToken<ArrayList<ListAPI>>() {
+            }.getType();
+            listAPIs = gson.fromJson(jsonAPI, typeAPI);
+
+        }
+
+        ArrayList<Profile> newProfile = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            newProfile.add(listDataAll.get(i));
+        }
+        Collections.shuffle(newProfile);
+
+//            ArrayList<Profile> profiles = new ArrayList<>();
+//            profiles = this.getIntent().getParcelableArrayListExtra(ListManager.LIST_ALL);
+        loadPageFragment(newProfile);
+
     }
 
     public void selectNavMenu() {

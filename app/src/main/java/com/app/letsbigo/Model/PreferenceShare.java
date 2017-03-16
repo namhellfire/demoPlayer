@@ -20,47 +20,51 @@ public class PreferenceShare {
     }
 
 //Public setters
+
     /**
      * Set a preference string value
-     * @param key the preference key to set
+     *
+     * @param key   the preference key to set
      * @param value the value for this key
      */
     public void setPreferenceStringValue(String key, String value) {
-        if(sharedEditor == null) {
+        if (sharedEditor == null) {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(key, value);
             editor.commit();
-        }else {
+        } else {
             sharedEditor.putString(key, value);
         }
     }
 
     /**
      * Set a preference boolean value
-     * @param key the preference key to set
+     *
+     * @param key   the preference key to set
      * @param value the value for this key
      */
     public void setPreferenceBooleanValue(String key, boolean value) {
-        if(sharedEditor == null) {
+        if (sharedEditor == null) {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean(key, value);
             editor.commit();
-        }else {
+        } else {
             sharedEditor.putBoolean(key, value);
         }
     }
 
     /**
      * Set a preference float value
-     * @param key the preference key to set
+     *
+     * @param key   the preference key to set
      * @param value the value for this key
      */
     public void setPreferenceFloatValue(String key, float value) {
-        if(sharedEditor == null) {
+        if (sharedEditor == null) {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putFloat(key, value);
             editor.commit();
-        }else {
+        } else {
             sharedEditor.putFloat(key, value);
         }
     }
@@ -73,7 +77,7 @@ public class PreferenceShare {
 
     // For boolean
     private static Boolean gPrefBooleanValue(SharedPreferences aPrefs, String key) {
-        if(aPrefs.contains(key)) {
+        if (aPrefs.contains(key)) {
             return aPrefs.getBoolean(key, false);
         }
         return null;
@@ -81,7 +85,7 @@ public class PreferenceShare {
 
     // For float
     private static Float gPrefFloatValue(SharedPreferences aPrefs, String key) {
-        if(aPrefs.contains(key)) {
+        if (aPrefs.contains(key)) {
             return aPrefs.getFloat(key, 0.0f);
         }
         return null;
@@ -89,6 +93,7 @@ public class PreferenceShare {
 
     /**
      * Get string preference value
+     *
      * @param key the key preference to retrieve
      * @return the value
      */
@@ -98,6 +103,7 @@ public class PreferenceShare {
 
     /**
      * Get boolean preference value
+     *
      * @param key the key preference to retrieve
      * @return the value
      */
@@ -105,8 +111,17 @@ public class PreferenceShare {
         return gPrefBooleanValue(preferences, key);
     }
 
+
+    public Boolean getPreferenceBooleanValue(String key, Boolean valueDefault) {
+        if (gPrefBooleanValue(preferences, key) != null) {
+            return gPrefBooleanValue(preferences, key);
+        }
+        return valueDefault;
+    }
+
     /**
      * Get float preference value
+     *
      * @param key the key preference to retrieve
      * @return the value
      */
