@@ -5,19 +5,23 @@
         <item
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_home"
-            android:title="Home" />
+            android:title="Home"
+            android:visible="false" />
         <item
             android:id="@+id/nav_new"
             android:icon="@drawable/ic_new"
-            android:title="New" />
+            android:title="New"
+            android:visible="false" />
         <item
             android:id="@+id/nav_top"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="Top" />
+            android:title="Top"
+            android:visible="false" />
         <item
             android:id="@+id/nav_online"
             android:icon="@drawable/ic_public"
-            android:title="Online" />
+            android:title="Online"
+            android:visible="true" />
     </group>
 
     <item android:title="Communicate">
@@ -34,7 +38,7 @@
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
                 android:title="Share screenShot"
-                android:visible="false"/>
+                android:visible="false" />
             <item
                 android:id="@+id/nav_rate"
                 android:icon="@drawable/ic_star"

@@ -262,7 +262,9 @@ public class MainActivity extends AppCompatActivity
             }
 
 
-            loadDataContent();
+//            loadDataContent();
+
+            LoadListOnline();
 
             share.setPreferenceBooleanValue(FIRST_RUN, false);
 
@@ -609,6 +611,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void LoadListOnline() {
+
+        navItemSelected = 3;
+        CURRENT_TAG = TAG_ONLINE_FRAGMENT;
+
         if (!asyncOffline.isCancelled() && asyncOffline != null) {
             asyncOffline.cancel(true);
         }

@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "285687774189",
+    "firebase_url": "https://letsbigo-cb21e.firebaseio.com",
+    "project_id": "letsbigo-cb21e",
+    "storage_bucket": "letsbigo-cb21e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:285687774189:android:aec554045e8e1f70",
+        "android_client_info": {
+          "package_name": "com.app.letsbigo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "285687774189-5g1j2ovq4desir0qq4p0dslib61bv0q3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWV3GQ2vecbO9nwp91BOZwtuQeCMrbvps"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
