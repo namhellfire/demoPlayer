@@ -51,6 +51,10 @@
                 android:id="@+id/nav_contact"
                 android:icon="@drawable/ic_action_mail"
                 android:title="Contact us" />
+            <item
+                android:id="@+id/nav_contact2"
+                android:icon="@drawable/ic_action_mail"
+                android:title="Contact us" />
         </menu>
     </item>
 
