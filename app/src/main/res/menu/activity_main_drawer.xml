@@ -31,6 +31,10 @@
                 android:icon="@drawable/ic_action_facebook"
                 android:title="Facebook page" />
             <item
+                android:id="@+id/facebook"
+                android:icon="@drawable/ic_action_facebook"
+                android:title="Facebook page" />
+            <item
                 android:id="@+id/nav_youtube"
                 android:icon="@drawable/ic_action_youtube"
                 android:title="Youtube channel" />
